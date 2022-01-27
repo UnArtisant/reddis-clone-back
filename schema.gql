@@ -39,6 +39,7 @@ type UserResponse {
 type Query {
   posts: [Post!]!
   post(id: Float!): Post
+  user: User!
 }
 
 type Mutation {

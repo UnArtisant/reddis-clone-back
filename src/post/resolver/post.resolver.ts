@@ -1,6 +1,8 @@
 import {Args, Mutation, Query, Resolver} from "@nestjs/graphql";
 import {Post} from "../entities/post.entity";
 import {EntityManager} from "@mikro-orm/core";
+import {UseGuards} from "@nestjs/common";
+import {JwtAuthGuard} from "../../auth/service/jwt-auth.guard";
 
 @Resolver(of => Post)
 export class PostResolver {
@@ -12,6 +14,7 @@ export class PostResolver {
         return await this.em.find(Post, {})
     }
 
+    @UseGuards(JwtAuthGuard)
     @Query(() => Post, {nullable: true})
     async post(
         @Args('id') id: number,

@@ -18,7 +18,6 @@ import {PassportModule} from "@nestjs/passport";
             playground: !__prod__,
             autoSchemaFile: 'schema.gql'
         }),
-        //JwtModule.register({ secret: process.env.JWT_SECRET }),
         PassportModule,
     ],
     providers: [],

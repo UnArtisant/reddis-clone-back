@@ -1,19 +1,30 @@
-import {Args, Mutation, Resolver} from "@nestjs/graphql";
+import {Args, Mutation, Resolver, Query} from "@nestjs/graphql";
 import {User} from "../entities/user.entity";
 import {UsernamePasswordInput} from "../input/username.password.input";
 import {EntityManager} from "@mikro-orm/core";
 import * as argon2 from "argon2";
 import {UserResponse} from "../response/user.response";
+import {JwtService} from "@nestjs/jwt";
+import {CurrentUser} from "../decorator/user.decorator";
+import {UseGuards} from "@nestjs/common";
+import {JwtAuthGuard} from "../service/jwt-auth.guard";
 
 @Resolver(of => User)
 export class UserResolver {
 
     constructor(
-        private readonly em: EntityManager
+        private readonly em: EntityManager,
+        private jwtService: JwtService
     ) {
     }
 
-    //TODO add schema validation
+
+    @Query(() => User)
+    @UseGuards(JwtAuthGuard)
+    async user(@CurrentUser() user: User): Promise<User | null> {
+        return user
+    }
+
     @Mutation(() => UserResponse)
     async register(
         @Args("params") params: UsernamePasswordInput
@@ -22,7 +33,8 @@ export class UserResolver {
             const hashedPassword = await argon2.hash(params.password)
             const user = this.em.create(User, {...params, password: hashedPassword})
             await this.em.persistAndFlush(user)
-            return {user: user}
+            const access_token = this.jwtService.sign({...user})
+            return {user: {...user, access_token}}
         } catch (e) {
             return {
                 errors: [{field: "password", message: "Invalid password"}]
@@ -30,7 +42,6 @@ export class UserResolver {
         }
     }
 
-    //TODO add schema validation
     @Mutation(() => UserResponse)
     async login(
         @Args("params") params: UsernamePasswordInput
@@ -47,6 +58,7 @@ export class UserResolver {
                 errors: [{field: "password", message: "Wrong credential"}]
             }
         }
-        return {user: {...user}}
+        const access_token = this.jwtService.sign({...user})
+        return {user: {...user, access_token}}
     }
 }
