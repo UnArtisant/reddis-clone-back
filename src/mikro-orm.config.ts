@@ -1,8 +1,10 @@
-import {User} from "./entities/User";
+import {User} from "./auth/entities/user.entity";
+import {Post} from "./post/entities/post.entity";
 
 export default {
     entities: [
-        User
+        User,
+        Post
     ],
     dbName: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USER,
