@@ -2,11 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Post {
+type User {
   _id: Float!
   id: String!
-  title: String!
-  text: String!
+  username: String!
+  password: String!
+  posts: [Post!]
+  access_token: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -16,14 +18,21 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type User {
+type Post {
   _id: Float!
   id: String!
+  title: String!
+  text: String!
+  points: Float!
+  user: User!
   createdAt: DateTime!
   updatedAt: DateTime!
-  username: String!
-  password: String!
-  access_token: String
+  textSnippet: String!
+}
+
+type PaginatedPost {
+  posts: [Post!]!
+  hasMore: Boolean!
 }
 
 type FieldError {
@@ -37,16 +46,23 @@ type UserResponse {
 }
 
 type Query {
-  posts: [Post!]!
+  posts(offset: Int, limit: Int!): PaginatedPost!
   post(id: Float!): Post
   user: User!
 }
 
 type Mutation {
-  createPost(text: String!, title: String!): Post!
+  createPost(options: PostInput!): Post!
   deletePost(id: Float!): Boolean!
   register(params: UsernamePasswordInput!): UserResponse!
   login(params: UsernamePasswordInput!): UserResponse!
+  logout: Boolean!
+  vote(value: Float!, postId: Float!): Boolean!
+}
+
+input PostInput {
+  text: String!
+  title: String!
 }
 
 input UsernamePasswordInput {

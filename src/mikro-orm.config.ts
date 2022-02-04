@@ -1,10 +1,12 @@
 import {User} from "./auth/entities/user.entity";
 import {Post} from "./post/entities/post.entity";
+import {Updoot} from "./upboot/entity/updoot.entity";
 
 export default {
     entities: [
         User,
-        Post
+        Post,
+        Updoot
     ],
     dbName: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USER,

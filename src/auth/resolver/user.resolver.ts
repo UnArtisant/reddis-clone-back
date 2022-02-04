@@ -61,4 +61,8 @@ export class UserResolver {
         const access_token = this.jwtService.sign({...user})
         return {user: {...user, access_token}}
     }
+    @Mutation(() => Boolean)
+     logout()  {
+        return true
+    }
 }

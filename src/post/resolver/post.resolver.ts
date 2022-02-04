@@ -1,17 +1,43 @@
-import {Args, Mutation, Query, Resolver} from "@nestjs/graphql";
+import {Args, Int, Mutation, Query, ResolveField, Resolver, Root} from "@nestjs/graphql";
 import {Post} from "../entities/post.entity";
-import {EntityManager} from "@mikro-orm/core";
+import {EntityManager, MikroORM} from "@mikro-orm/core";
 import {UseGuards} from "@nestjs/common";
 import {JwtAuthGuard} from "../../auth/service/jwt-auth.guard";
+import {PostInput} from "../input/post.input";
+import {CurrentUser} from "../../auth/decorator/user.decorator";
+import {User} from "../../auth/entities/user.entity";
+import {InjectRepository} from "@mikro-orm/nestjs";
+import {EntityRepository} from "@mikro-orm/postgresql";
+import {PaginatedPost} from "../type/paginated.post";
 
-@Resolver(of => Post)
+@Resolver(Post)
 export class PostResolver {
-    constructor(private readonly em: EntityManager) {
+    constructor(
+        private readonly em: EntityManager,
+        @InjectRepository(Post)
+        private readonly postRepository: EntityRepository<Post>,
+    ) {
     }
 
-    @Query(() => [Post])
-    async posts(): Promise<Post[]> {
-        return await this.em.find(Post, {})
+    @ResolveField(() => String)
+    textSnippet(@Root() root: Post) {
+        return root.text.slice(0,50)
+    }
+
+    @Query(() => PaginatedPost)
+    async posts(
+        @Args('limit', { type: () => Int }) limit: number,
+        @Args('offset', {nullable: true, type: () => Int}) offset: number = 0
+    ): Promise<PaginatedPost> {
+        const qb = this.postRepository
+            .createQueryBuilder("p")
+            .orderBy({createdAt: "DESC"})
+            .limit(limit + 1)
+            .offset((limit * offset))
+
+        const result = await qb.getResult()
+        await this.postRepository.populate(result, ['user']);
+        return {posts: result.slice(0, limit), hasMore: result.length > limit}
     }
 
     @UseGuards(JwtAuthGuard)
@@ -23,11 +49,13 @@ export class PostResolver {
     }
 
     @Mutation(() => Post)
+    @UseGuards(JwtAuthGuard)
     async createPost(
-        @Args("title") title: string,
-        @Args("text") text: string,
+        @Args("options") options: PostInput,
+        @CurrentUser() user: User
     ): Promise<Post> {
-        const post = this.em.create(Post, {title, text})
+        const post = this.em.create(Post, {...options})
+        post.user = user
         await this.em.persistAndFlush(post)
         return post
     }

@@ -3,7 +3,6 @@ import {MikroOrmModule} from "@mikro-orm/nestjs";
 import {ConfigModule} from "@nestjs/config";
 import {GraphQLModule} from "@nestjs/graphql";
 import {__prod__} from "./constant/global";
-import {JwtModule} from "@nestjs/jwt";
 import {PassportModule} from "@nestjs/passport";
 
 @Global()
@@ -16,7 +15,10 @@ import {PassportModule} from "@nestjs/passport";
         GraphQLModule.forRoot({
             debug: !__prod__,
             playground: !__prod__,
-            autoSchemaFile: 'schema.gql'
+            autoSchemaFile: 'schema.gql',
+            cors: {
+                origin: 'http://localhost:3000',
+            },
         }),
         PassportModule,
     ],
