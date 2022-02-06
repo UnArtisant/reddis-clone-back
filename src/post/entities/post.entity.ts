@@ -1,5 +1,5 @@
 import {Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property, SerializedPrimaryKey} from "@mikro-orm/core";
-import {Field, ObjectType} from "@nestjs/graphql";
+import {Field, Int, ObjectType} from "@nestjs/graphql";
 import {v4 as uuidv4} from 'uuid';
 import {User} from "../../auth/entities/user.entity";
 import {Updoot} from "../../upboot/entity/updoot.entity";
@@ -8,7 +8,7 @@ import {Updoot} from "../../upboot/entity/updoot.entity";
 @Entity()
 export class Post {
 
-    @Field()
+    @Field(() => Int)
     @PrimaryKey()
     _id!: number;
 

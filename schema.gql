@@ -19,7 +19,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Post {
-  _id: Float!
+  _id: Int!
   id: String!
   title: String!
   text: String!
@@ -45,9 +45,19 @@ type UserResponse {
   errors: [FieldError!]
 }
 
+type UpdootError {
+  title: String!
+  message: String!
+}
+
+type UpdootResponse {
+  updoot: Boolean!
+  errors: UpdootError
+}
+
 type Query {
   posts(offset: Int, limit: Int!): PaginatedPost!
-  post(id: Float!): Post
+  post(id: Int!): Post
   user: User!
 }
 
@@ -57,7 +67,7 @@ type Mutation {
   register(params: UsernamePasswordInput!): UserResponse!
   login(params: UsernamePasswordInput!): UserResponse!
   logout: Boolean!
-  vote(value: Float!, postId: Float!): Boolean!
+  vote(value: Int!, postId: Int!): UpdootResponse!
 }
 
 input PostInput {

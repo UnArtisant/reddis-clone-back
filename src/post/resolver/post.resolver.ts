@@ -40,12 +40,12 @@ export class PostResolver {
         return {posts: result.slice(0, limit), hasMore: result.length > limit}
     }
 
-    @UseGuards(JwtAuthGuard)
     @Query(() => Post, {nullable: true})
     async post(
-        @Args('id') id: number,
+        @Args('id', {type: () => Int}) id: number,
     ): Promise<Post | null> {
-        return await this.em.findOne(Post, {_id: id})
+        const post = await this.em.findOne(Post, {_id: id})
+        return await this.postRepository.populate(post, ['user']);
     }
 
     @Mutation(() => Post)
